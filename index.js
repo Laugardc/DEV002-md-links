@@ -1,5 +1,5 @@
 
-import { absolutePath, pathExists, findMDFiles } from './functions.js';
+import { absolutePath, pathExists, findMDFiles, findDirectory } from './functions.js';
 
 //inputs path , options
 //output array de links
@@ -21,18 +21,10 @@ export function mdLinks(path, options = {}) {
       console.log("la ruta si es absoluta");
       //entras y buscas
       //buscar archivos MD
-      let arrayMDFiles = findMDFiles(path);
-
-      // if(isFile(path)){
-      //   console.log ('si existe archivo');
-      //   if(isFileMd(path)){
-      //     console.log('es un archivo md');
-      //   }else{
-      //     console.log('no es md');
-      //   }
-      // }else{
-      //   console.log('no hay archivo');
-      // }
+      if(findDirectory(path)){
+        let arrayMd = findMDFiles(path);
+        console.log('arrayMd',arrayMd);
+      }
     }
     else {
       console.log('no es absoluta');
@@ -45,13 +37,3 @@ export function mdLinks(path, options = {}) {
 
 
 
-// mdLinks('/.', {}).then(res => {
-//   console.log(res);
-// }).catch(error => {
-//   console.error(error);
-// });
-
-
-// process.argv.forEach(function (val, index, array) {
-//   console.log(index + ': ' + val);
-// });
