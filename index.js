@@ -1,5 +1,5 @@
 
-import { absolutePath, pathExists, findMDFiles, findDirectory } from './functions.js';
+import { absolutePath, pathExists, findMDFiles, findDirectory, findLinksFileContent, relativeToAbsolutePath } from './functions.js';
 
 //inputs path , options
 //output array de links
@@ -21,13 +21,21 @@ export function mdLinks(path, options = {}) {
       console.log("la ruta si es absoluta");
       //entras y buscas
       //buscar archivos MD
-      if(findDirectory(path)){
+      if (findDirectory(path)) {
         let arrayMd = findMDFiles(path);
-        console.log('arrayMd',arrayMd);
+        console.log('arrayMd', arrayMd);
+        if (arrayMd.length > 0) {
+          let firstMdFile = arrayMd[0];
+          let links = findLinksFileContent(firstMdFile);
+          console.log('array links', links);
+        }
       }
     }
-    else {
+    else { 
       console.log('no es absoluta');
+      let absolutePath = relativeToAbsolutePath(path);
+      console.log('ahora es abosluta', relativeToAbsolutePath);
+      
       //convertir
 
     }
