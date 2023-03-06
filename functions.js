@@ -1,25 +1,29 @@
 import { existsSync } from 'node:fs';
 import fs from 'node:fs';
 import path from 'node:path';
+import { Axios } from 'axios';
 
 //Verificar si existe ruta
 export function pathExists(route) {
     const result = existsSync(route) ? true : false;
     return result;
 }
-//Verificar si la ruta es absoluta
-export function absolutePath(route) {
+//Si la ruta es absoluta, mantenla, si es relativa conviertela
+export function getAbsolutePath(route) {
+
     const result = path.isAbsolute(route);
-    return result;
-}
-//Si la ruta es relativa, convertirla a absoluta
-export function relativeToAbsolutePath(route) {
-    const result = path.resolve(route);
-    return result;
+
+    if(result) {
+        return route;
+    }
+    else {
+        return path.resolve(route);
+    }
 }
 
 // Es un directorio?
 export function findDirectory(path) {
+    console.log('mylog ', path);
     const result = fs.lstatSync(path).isDirectory()
     return result;
 }
@@ -32,7 +36,7 @@ export function findMDFiles(path) {
     })
     files.forEach(file => {
         if (file.endsWith('.md')) {
-            arrayMd.push(file)
+            arrayMd.push(file);
         } 
     })
     return arrayMd;
@@ -62,3 +66,22 @@ export function findLinksFileContent(route) {
     }
     return linkFileMd
 };
+// usando Axios, hacemos peticiones HTTP, axios.get incluye el status code
+export function linksStatus(urls) {
+    return Promise.all(urls.map((link) => axios.get(link.href)
+    .then((response) => ({...link, status: response.status, message:'ok'}))
+    .catch((error) => {
+        let errorStatus;
+        if(error.response) {
+            errorStatus = error.response.status;
+        } else if (error.request){
+            errorStatus = 500;
+        } else {
+            errorStatus = 400;
+        }
+        return {
+            ...link, status: errorStatus, message: 'fail'
+        };
+    })
+    ))
+}
