@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { mdLinks } from "./index.js";
 
 const route = process.argv[2];
