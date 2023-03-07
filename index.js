@@ -28,7 +28,6 @@ export function mdLinks(path, options) {
       if (arrayMd.length > 0) {
         let links = [];
         arrayMd.forEach(fileMd => {
-          // console.log('File: ', fileMd);
           let actualArray = findLinksFileContent(fileMd);
           links = links.concat(actualArray);
         });
@@ -46,10 +45,13 @@ export function mdLinks(path, options) {
               responses => {
                 // console.log('All res', responses);
                 responses.map(response => {
+                  //si la solicitud se cumple
                   if (response.status === 'fulfilled') {
                     // console.log(response);
+                    //imprime la ruta (tendria que mostrar la ruta relativa?), el link, estado de la respuesta y el host de solicitud
                     console.log(`${absPath} ${response.value.config.url} ok ${response.value.status} link a ${response.value.request.host}`);
                   }
+                  //si la solicitud se rechaza
                   else if (response.status === 'rejected') {
                     // if(response.reason.response) {
                     //   console.log('tengo response');
@@ -69,11 +71,13 @@ export function mdLinks(path, options) {
                     //   console.log('tengo res');
                     // }
                     // console.log(response.reason.response);
+                    //imprime la ruta, el link, el estado de respuesta - si no hay response o status imprime error500 -, host
                     console.log(`${absPath} ${response.reason.config.url} fail ${response.reason.response?.status || 500} link a ${response.reason.request.host}`);
                   }
 
                 })
               }
+              //si hay error en el proceso de validacion
             ).catch(
               // err => console.error(err.response.status)
               err => {

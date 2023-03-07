@@ -68,16 +68,6 @@ export function findLinksFileContent(route) {
     }
     return linkFileMd
 };
-// usando Axios, hacemos peticiones HTTP, axios.get que incluye el status code
-export function validateLinks(urls) {
-    let promises = [];
-    urls.forEach((link) => {
-        promises.push(axios
-        .get(link.href));
-    });
-    console.log('promises: ', promises);
-    return Promise.allSettled(promises);
-}
 //total de links y total de links unicos
 export function getStats(links){
    let copyLinks = [...links];
@@ -90,6 +80,19 @@ export function getStats(links){
     console.log('total:',links.length, 'unicos:',copyLinks.length);
     return
 }
+// usando Axios, hacemos peticiones HTTP, axios.get que incluye el status code
+//devuelve una promesa, que se resuelve con arreglo de objetos validando cada url
+export function validateLinks(urls) {
+    let promises = [];
+    urls.forEach((link) => {
+        promises.push(axios
+        .get(link.href));
+    });
+    console.log('promises: ', promises);
+    //allSettled espera a que se resuelvan todas las promesas y devuelve ya sea resuelta o rechazada
+    return Promise.allSettled(promises);
+}
+//links rotos
 export function brokenLinks(arrayPath) {
     const broken=arrayPath.filter(el => el.ok==='fail')
 //    return broken.length? broken.length:0
