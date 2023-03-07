@@ -1,16 +1,16 @@
 
-import { absolutePath, pathExists, findMDFiles, findDirectory, findLinksFileContent, relativeToAbsolutePath, getAbsolutePath } from './functions.js';
+import { pathExists, findMDFiles, findDirectory, findLinksFileContent, getAbsolutePath, validateLinks, getStats } from './functions.js';
 
 //inputs path , options
 //output array de links
 //descripcion 
 if (process.argv[2]) {
   console.log('la usuaria si paso parametro');
-  mdLinks(process.argv[2]);
+  mdLinks(process.argv[2], process.argv[3]);
 } else {
   console.log('porfavor pase una ruta');
 };
-export function mdLinks(path, options = {}) {
+export function mdLinks(path, options) {
   // identificar si la ruta existe
   if (pathExists(path) === false) {
     console.log('No es valida la ruta');
@@ -26,9 +26,62 @@ export function mdLinks(path, options = {}) {
       let arrayMd = findMDFiles(absPath);
       console.log('arrayMd', arrayMd);
       if (arrayMd.length > 0) {
-        let firstMdFile = arrayMd[0];
-        let links = findLinksFileContent(firstMdFile);
-        console.log('array links', links);
+        let links = [];
+        arrayMd.forEach(fileMd => {
+          // console.log('File: ', fileMd);
+          let actualArray = findLinksFileContent(fileMd);
+          links = links.concat(actualArray);
+        });
+        console.log('links', links);
+        // console.log(process.argv[3]);
+        // console.log(options);
+        if (options === '--stats') {
+          getStats(links);
+        }
+        if (options === '--validate') {
+          validateLinks(links)
+            .then(
+              // resp => resp.map(res => console.log(res.href, res.status))
+              // responses => responses.map(res => console.log('All res', res))
+              responses => {
+                // console.log('All res', responses);
+                responses.map(response => {
+                  if (response.status === 'fulfilled') {
+                    // console.log(response);
+                    console.log(`${absPath} ${response.value.config.url} ok ${response.value.status} link a ${response.value.request.host}`);
+                  }
+                  else if (response.status === 'rejected') {
+                    // if(response.reason.response) {
+                    //   console.log('tengo response');
+                    //   if (response.reason.response.status) {
+                    //     console.log('y tengo status');
+                    //   }
+                    //   else {
+                    //     console.log('y NO tengo status');
+                    //   }
+                    // }
+                    // else {
+                    //   console.log('NO tengo response');
+                    //   console.log('Solo tengo: ', Object.keys(response.reason));
+                    //   console.log('Solo tengo: ', response.reason);
+                    // }
+                    // if(response.reason.res) {
+                    //   console.log('tengo res');
+                    // }
+                    // console.log(response.reason.response);
+                    console.log(`${absPath} ${response.reason.config.url} fail ${response.reason.response?.status || 500} link a ${response.reason.request.host}`);
+                  }
+
+                })
+              }
+            ).catch(
+              // err => console.error(err.response.status)
+              err => {
+                console.log('All err', err);
+              }
+            );
+        }
+
       }
     }
   }
