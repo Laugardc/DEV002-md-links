@@ -10,9 +10,10 @@ import {
 //descripcion 
 
 export function mdLinks(path, options = {}) {
-  // identificar si la ruta existe
+  return new Promise((resolve, reject) => {
+    // identificar si la ruta existe
   if (pathExists(path) === false) {
-    console.log('No es valida la ruta');
+    reject('No es valida la ruta');
     return;
   } else {
     // console.log('ruta SI es valida');
@@ -44,7 +45,7 @@ export function mdLinks(path, options = {}) {
                   //si la solicitud se cumple
                   if (response.status === 'fulfilled') {
                     //imprime la ruta (tendria que mostrar la ruta relativa?), el link, estado de la respuesta y el host de solicitud
-                    console.log(`${absPath} ${response.value.config.url} ok ${response.value.status} link a ${response.value.request.host}`);
+                   console.log(`${absPath} ${response.value.config.url} ok ${response.value.status} link a ${response.value.request.host}`);
                   }
                   //si la solicitud se rechaza
                   else if (response.status === 'rejected') {
@@ -57,7 +58,7 @@ export function mdLinks(path, options = {}) {
               //si hay error en el proceso de validacion
             ).catch(
               err => {
-                console.log('All err', err);
+                reject('All err', err);
               }
             );
         }
@@ -73,4 +74,6 @@ export function mdLinks(path, options = {}) {
       }
     }
   }
+
+  })
 }

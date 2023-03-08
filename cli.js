@@ -12,6 +12,7 @@ else {
         stats: process.argv.includes('--stats')
     };
 
-    mdLinks(route, options);
+    mdLinks(route, options).then((res) => {console.log(res)}).catch((error) => {console.log(error)})
+
 }
 
