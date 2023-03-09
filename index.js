@@ -60,7 +60,7 @@ export function mdLinks(path, options = {}) {
                     result.push(`${absPath} ${httpResponse.reason.config.url} fail ${httpResponse.reason.response?.status || 500} link a ${httpResponse.reason.request.host}`);
                   }
                 });
-                resolve({stats: null, validate: result, links: links});
+                resolve({stats: null, validate: result, links: null});
               }
               //si hay error en el proceso de validacion
             ).catch(
