@@ -14,7 +14,7 @@
 * [10. Achicando el problema](#10-achicando-el-problema)
 
 ***
-
+! [Diagrama-md-Links](prueba/diagrama/diagrama mdLinks Lau.drawio.png)
 ## 1. Preámbulo
 
 [Markdown](https://es.wikipedia.org/wiki/Markdown) es un lenguaje de marcado

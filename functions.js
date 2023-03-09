@@ -63,6 +63,7 @@ export function findLinksFileContent(route) {
     }
     return linkFileMd;
 };
+
 //total de links y total de links unicos
 export function getStats(links) {
     let copyLinks = [...links];
@@ -73,7 +74,7 @@ export function getStats(links) {
         return exists;
     });
     console.log('Total:', links.length, 'Unique:', copyLinks.length);
-    return
+    return {total: links.length, unique: copyLinks.length};
 }
 // usando Axios, hacemos peticiones HTTP, axios.get que incluye el status code
 //devuelve una promesa, que se resuelve con arreglo de objetos validando cada url
@@ -88,8 +89,33 @@ export function validateLinks(urls) {
     return Promise.allSettled(promises);
 }
 //links rotos
-export function getTotalBroken(arrayPath) {
-    const broken = arrayPath.filter(el => el.ok === 'fail')
-    console.log ('Broken:',broken.length ? broken.length : 0);
-    return
-}
+
+//Descripcion: funcion que va a buscar los links que su estatus sea fail
+//input: links es un arreglo de objetos del tipo link {href, path, text} 
+//output: el total de los links rotos (numero)
+
+export function getTotalBroken(links) {
+    return new Promise((resolve, reject) => {
+      let totalBroken = 0;
+      let promises = links.map(link => {
+        return axios.get(link.href)
+          .then(response => {
+            if (response.status >= 400) {
+              totalBroken++;
+            }
+          })
+          .catch(error => {
+            totalBroken++;
+          });
+      });
+  
+      Promise.all(promises)
+        .then(() => {
+          resolve(totalBroken);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
+

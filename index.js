@@ -6,7 +6,7 @@ import {
 } from './functions.js';
 
 //inputs path , options
-//output array de links
+//output Objeto {stats, validate, links}
 //descripcion 
 
 export function mdLinks(path, options = {}) {
@@ -29,50 +29,74 @@ export function mdLinks(path, options = {}) {
       if (arrayMd.length > 0) {
         let links = [];
         arrayMd.forEach(fileMd => {
-          let actualArray = findLinksFileContent(fileMd);
-          links = links.concat(actualArray);
+          //por cada documento que recorre trae un arreglo con los links de ese documento
+          let linksByFile = findLinksFileContent(fileMd);
+          //aqui los concatenamos para traer en 'links' todos los links encontrados de todos los documentos
+          links = links.concat(linksByFile);
         });
+        if(links.length === 0){
+          reject('No se encontraron links en los archivos .md');
+        }
         // console.log('links', links);
         if (options.stats && !options.validate) {
-          getStats(links);
+          resolve({stats: getStats(links), validate: null, links: links});
         }
         else if (options.validate && !options.stats) {
           validateLinks(links)
             .then(
+              //trae un arreglo de objetos, que resultaron del resolve de las promesas
               responses => {
-                // console.log('All res', responses);
-                responses.map(response => {
+                let result = [];
+                //httpResponse es un objeto que resulta de la llamada de axios.get
+                responses.map(httpResponse => {
                   //si la solicitud se cumple
-                  if (response.status === 'fulfilled') {
-                    //imprime la ruta (tendria que mostrar la ruta relativa?), el link, estado de la respuesta y el host de solicitud
-                   console.log(`${absPath} ${response.value.config.url} ok ${response.value.status} link a ${response.value.request.host}`);
+                  if (httpResponse.status === 'fulfilled') {
+                    //imprime la ruta , el link, estado de la respuesta y el host de solicitud
+                   result.push(`${absPath} ${httpResponse.value.config.url} ok ${httpResponse.value.status} link a ${httpResponse.value.request.host}`);
                   }
                   //si la solicitud se rechaza
-                  else if (response.status === 'rejected') {
+                  else if (httpResponse.status === 'rejected') {
                     //imprime la ruta, el link, el estado de respuesta - si no hay response o status imprime error500 -, host
-                    console.log(`${absPath} ${response.reason.config.url} fail ${response.reason.response?.status || 500} link a ${response.reason.request.host}`);
+                    result.push(`${absPath} ${httpResponse.reason.config.url} fail ${httpResponse.reason.response?.status || 500} link a ${httpResponse.reason.request.host}`);
                   }
-
-                })
+                });
+                resolve({stats: null, validate: result, links: links});
               }
               //si hay error en el proceso de validacion
             ).catch(
               err => {
-                reject('All err', err);
+                reject(err);
               }
             );
         }
         else if (options.stats && options.validate) {
-          getStats(links);
-          getTotalBroken(links);
+          let stats =  getStats(links);
+          getTotalBroken(links)
+          .then(totalBroken => {
+            stats.totalbroken = totalBroken;
+            resolve({stats: stats, validate: null, links: links});
+          })
+          .catch(err =>{
+            reject(err);
+          });
           
         }
         else {
-          console.log('ni validate ni stats');
-          links.map(element => console.log(`${element.path} ${element.href} ${element.text}`));
+          let result = links.map(element => `${element.path} ${element.href} ${element.text}`);
+          resolve(result);
+          
         }
       }
+      else {
+        reject('No hay archivos .md en el directorio.');
+        return;
+      }
     }
+    else {
+      reject('La ruta no es un directorio.');
+      return;
+    }
+    
   }
 
   })
